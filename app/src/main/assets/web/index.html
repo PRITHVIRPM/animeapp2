@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AniSuggest — Smart Anime Discovery</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Desktop Sidebar / Mobile Header -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-badge">⚡ ANISUGGEST</span>
+        <h1>AniSuggest</h1>
+        <p class="tagline">Smart Anime Discovery</p>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="discover">
+          <span class="icon">🧭</span> Discover
+        </button>
+        <button class="nav-item" data-tab="quiz">
+          <span class="icon">⏱️</span> 30s Quiz
+        </button>
+        <button class="nav-item" data-tab="wheel">
+          <span class="icon">🎰</span> Surprise Wheel
+        </button>
+        <button class="nav-item" data-tab="matcher">
+          <span class="icon">✨</span> Matcher
+        </button>
+        <button class="nav-item" data-tab="watchlist">
+          <span class="icon">🔖</span> Watchlist <span class="badge" id="watchlistCount">0</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="mode-indicator">
+          <span class="dot"></span> Running as Desktop Web
+        </div>
+        <p class="version-label">v1.2.0 • Hybrid Engine</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Search & Engine Bar -->
+      <header class="top-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search 50,000+ anime (e.g. Frieren, Naruto, Death Note)...">
+          <button id="clearSearchBtn" class="clear-btn hidden">&times;</button>
+        </div>
+
+        <div class="engine-toggle">
+          <span class="toggle-label" id="engineStatusLabel">Curated Hits</span>
+          <label class="switch">
+            <input type="checkbox" id="jikanToggle">
+            <span class="slider round"></span>
+          </label>
+          <span class="toggle-sub">🌐 Live Jikan API</span>
+        </div>
+      </header>
+
+      <!-- View: Discover -->
+      <section id="viewDiscover" class="view-panel active">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+          <div class="hero-content">
+            <span class="hero-badge">AI & MOOD POWERED</span>
+            <h2>Stop Scrolling. Start Watching.</h2>
+            <p>Tell us your vibe or take our 30-second quiz to get immediate, high-confidence anime recommendations.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" id="heroQuizBtn">Take 30s Quiz</button>
+              <button class="btn btn-outline" id="heroWheelBtn">Spin Gacha Wheel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Jikan Sub-tabs (Visible when Live API enabled) -->
+        <div class="jikan-tabs hidden" id="jikanTabs">
+          <button class="jikan-tab active" data-source="top">Top Airing</button>
+          <button class="jikan-tab" data-source="seasonal">This Season</button>
+          <button class="jikan-tab" data-source="search">Search Results</button>
+        </div>
+
+        <!-- Mood Selector Chips -->
+        <div class="section-header">
+          <h3>Pick Your Vibe</h3>
+          <span class="section-sub">Emotion-driven discovery</span>
+        </div>
+        <div class="mood-chips" id="moodChipsContainer"></div>
+
+        <!-- Genre Selector Filter -->
+        <div class="genre-chips" id="genreChipsContainer"></div>
+
+        <!-- Status & Results Count -->
+        <div class="results-header">
+          <h4 id="resultsTitle">Curated Masterpieces</h4>
+          <span id="resultsCount" class="results-count">24 titles</span>
+        </div>
+
+        <!-- Loading & Error Indicators -->
+        <div id="loadingIndicator" class="loading-state hidden">
+          <div class="spinner"></div>
+          <p>Searching live anime database...</p>
+        </div>
+
+        <div id="errorBanner" class="error-banner hidden">
+          <span class="error-msg" id="errorMsg">Failed to connect to online anime service.</span>
+          <button class="btn btn-sm btn-outline" id="retryBtn">Retry</button>
+        </div>
+
+        <!-- Anime Card Grid -->
+        <div class="anime-grid" id="animeGrid"></div>
+      </section>
+
+      <!-- View: 30s Quiz -->
+      <section id="viewQuiz" class="view-panel">
+        <div class="quiz-container">
+          <div class="quiz-header">
+            <span class="quiz-badge">QUICK DECISION TREE</span>
+            <h2>Find Your Next Obsession in 30 Seconds</h2>
+            <p>Answer 3 quick questions to get 3 laser-focused anime recommendations.</p>
+          </div>
+
+          <div class="quiz-card" id="quizCard">
+            <div class="quiz-step-indicator">
+              <div class="step active" id="step1Dot">1</div>
+              <div class="line"></div>
+              <div class="step" id="step2Dot">2</div>
+              <div class="line"></div>
+              <div class="step" id="step3Dot">3</div>
+            </div>
+
+            <div id="quizQuestionArea">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div id="quizResultsArea" class="quiz-results hidden">
+            <h3>Your Personalized Picks</h3>
+            <div class="anime-grid" id="quizResultsGrid"></div>
+            <button class="btn btn-secondary mt-4" id="retakeQuizBtn">Retake Quiz</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: Surprise Wheel -->
+      <section id="viewWheel" class="view-panel">
+        <div class="wheel-container">
+          <div class="wheel-header">
+            <span class="quiz-badge">GACHA ROULETTE</span>
+            <h2>Can't Decide? Let Fate Choose</h2>
+            <p>Spin the roulette wheel to get an instant surprise recommendation from our curated hits.</p>
+          </div>
+
+          <div class="wheel-layout">
+            <div class="wheel-canvas-box">
+              <canvas id="rouletteCanvas" width="400" height="400"></canvas>
+              <div class="pointer">▼</div>
+              <button class="btn btn-primary spin-btn" id="spinWheelBtn">SPIN WHEEL</button>
+            </div>
+
+            <div class="wheel-result-card hidden" id="wheelResultCard">
+              <div class="card-inner">
+                <img id="wheelResultImg" src="" alt="Anime Cover">
+                <div class="card-info">
+                  <span class="badge" id="wheelResultScore">★ 9.0</span>
+                  <h3 id="wheelResultTitle">Anime Title</h3>
+                  <p id="wheelResultHook" class="hook"></p>
+                  <p id="wheelResultSynopsis" class="synopsis"></p>
+                  <div class="card-actions">
+                    <button class="btn btn-primary" id="wheelViewDetailBtn">View Details</button>
+                    <button class="btn btn-outline" id="wheelAddWatchlistBtn">+ Watchlist</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: Matcher -->
+      <section id="viewMatcher" class="view-panel">
+        <div class="matcher-container">
+          <div class="matcher-header">
+            <span class="quiz-badge">PREFERENCE & SIMILARITY RADAR</span>
+            <h2>Smart Anime Matcher</h2>
+            <p>Fine-tune custom parameters or find shows similar to your favorite series.</p>
+          </div>
+
+          <div class="matcher-controls">
+            <div class="control-group">
+              <label>Select Base Anime to Match Against:</label>
+              <select id="baseAnimeSelect" class="form-select"></select>
+            </div>
+
+            <button class="btn btn-primary" id="calculateSimilarBtn">Find Similar Anime</button>
+          </div>
+
+          <div class="section-header mt-6">
+            <h3>Similar Anime Recommendations</h3>
+            <span class="section-sub">Matched by pacing, themes & studio style</span>
+          </div>
+
+          <div class="anime-grid" id="matcherGrid"></div>
+        </div>
+      </section>
+
+      <!-- View: Watchlist -->
+      <section id="viewWatchlist" class="view-panel">
+        <div class="watchlist-header">
+          <div>
+            <h2>My Anime Watchlist</h2>
+            <p>Track your progress, increment episodes, and organize your anime journey.</p>
+          </div>
+          <div class="watchlist-filters" id="watchlistStatusFilters">
+            <button class="filter-tab active" data-status="ALL">All (<span id="countAll">0</span>)</button>
+            <button class="filter-tab" data-status="WATCHING">Watching (<span id="countWatching">0</span>)</button>
+            <button class="filter-tab" data-status="PLAN_TO_WATCH">Plan to Watch (<span id="countPlan">0</span>)</button>
+            <button class="filter-tab" data-status="COMPLETED">Completed (<span id="countCompleted">0</span>)</button>
+            <button class="filter-tab" data-status="FAVORITES">Favorites (<span id="countFavs">0</span>)</button>
+          </div>
+        </div>
+
+        <div class="watchlist-list" id="watchlistContainer"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Anime Detail Modal -->
+  <div id="detailModal" class="modal hidden">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="modalCloseBtn">&times;</button>
+      <div class="modal-body" id="modalBody">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
