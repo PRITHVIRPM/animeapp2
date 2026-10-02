@@ -1,0 +1,6 @@
+{
+  "name": "AniSuggest",
+  "description": "Smart anime discovery and recommendation app featuring mood-based suggestions, curated themes, anime search, details, and watchlist tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
